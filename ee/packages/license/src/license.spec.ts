@@ -105,7 +105,7 @@ describe('Validate License Limits', () => {
 		});
 	});
 	describe('fair usage behavior', () => {
-		it('should change the flag to true if the counter is equal or over the limit', async () => {
+		it('should change the `prevent_action` flag to true if the counter is equal or over the limit', async () => {
 			const licenseManager = await getReadyLicenseManager();
 
 			const fairUsageCallback = jest.fn();
@@ -137,7 +137,7 @@ describe('Validate License Limits', () => {
 			fairUsageCallback.mockClear();
 			licenseManager.setLicenseLimitCounter('activeUsers', () => 10);
 			await expect(licenseManager.shouldPreventAction('activeUsers')).resolves.toBe(true);
-			expect(fairUsageCallback).toHaveBeenCalledTimes(0);
+			expect(fairUsageCallback).toHaveBeenCalledTimes(1);
 			expect(preventActionCallback).toHaveBeenCalledTimes(1);
 
 			licenseManager.setLicenseLimitCounter('activeUsers', () => 11);
@@ -148,7 +148,7 @@ describe('Validate License Limits', () => {
 			await expect(licenseManager.shouldPreventAction('activeUsers')).resolves.toBe(true);
 			await expect(licenseManager.shouldPreventAction('activeUsers')).resolves.toBe(true);
 			expect(preventActionCallback).toHaveBeenCalledTimes(4);
-			expect(fairUsageCallback).toHaveBeenCalledTimes(1);
+			expect(fairUsageCallback).toHaveBeenCalledTimes(0);
 		});
 		it('should trigger the toggle event if the counter is under the limit', async () => {
 			const licenseManager = await getReadyLicenseManager();
@@ -279,6 +279,9 @@ describe('License.getInfo', () => {
 		it('should respect the default if there is no license applied', async () => {
 			const licenseManager = new LicenseImp();
 
+			licenseManager.setLicenseLimitCounter('privateApps', () => 0);
+			licenseManager.setLicenseLimitCounter('marketplaceApps', () => 0);
+
 			expect(
 				(
 					await licenseManager.getInfo({
@@ -288,7 +291,7 @@ describe('License.getInfo', () => {
 					})
 				).limits,
 			).toMatchObject({
-				privateApps: { max: 3 },
+				privateApps: { max: 0 },
 				marketplaceApps: { max: 5 },
 			});
 		});
@@ -414,5 +417,57 @@ describe('License.setLicense', () => {
 		expect(validateCallback).toHaveBeenCalledTimes(1);
 		expect(moduleCallback).toHaveBeenCalledTimes(1);
 		expect(syncCallback).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('License.removeLicense', () => {
+	it('should trigger the removed event', async () => {
+		const licenseManager = await getReadyLicenseManager();
+
+		const removeLicense = jest.fn();
+		const moduleCallback = jest.fn();
+
+		licenseManager.on('removed', removeLicense);
+
+		licenseManager.onModule(moduleCallback);
+
+		const license = await new MockedLicenseBuilder().withGratedModules(['auditing', 'chat.rocket.test-addon']).withLimits('activeUsers', [
+			{
+				max: 10,
+				behavior: 'disable_modules',
+				modules: ['auditing'],
+			},
+		]);
+
+		await expect(licenseManager.setLicense(await license.sign(), true)).resolves.toBe(true);
+		expect(removeLicense).toHaveBeenCalledTimes(0);
+		expect(moduleCallback).toHaveBeenNthCalledWith(1, {
+			module: 'auditing',
+			valid: true,
+			external: false,
+		});
+		expect(moduleCallback).toHaveBeenNthCalledWith(2, {
+			module: 'chat.rocket.test-addon',
+			valid: true,
+			external: true,
+		});
+
+		removeLicense.mockClear();
+		moduleCallback.mockClear();
+		licenseManager.remove();
+
+		expect(removeLicense).toHaveBeenCalledTimes(1);
+		expect(moduleCallback).toHaveBeenNthCalledWith(1, {
+			module: 'auditing',
+			valid: false,
+			external: false,
+		});
+		expect(moduleCallback).toHaveBeenNthCalledWith(2, {
+			module: 'chat.rocket.test-addon',
+			valid: false,
+			external: true,
+		});
+
+		expect(licenseManager.hasValidLicense()).toBe(false);
 	});
 });

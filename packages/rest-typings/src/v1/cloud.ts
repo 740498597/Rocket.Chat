@@ -1,4 +1,4 @@
-import type { CloudRegistrationIntentData, CloudConfirmationPollData, CloudRegistrationStatus, Cloud } from '@rocket.chat/core-typings';
+import type { CloudRegistrationIntentData, CloudConfirmationPollData, CloudRegistrationStatus } from '@rocket.chat/core-typings';
 import Ajv from 'ajv';
 
 const ajv = new Ajv({
@@ -53,14 +53,10 @@ const CloudConfirmationPollSchema = {
 	properties: {
 		deviceCode: {
 			type: 'string',
-		},
-		resend: {
-			type: 'string',
-			nullable: true,
+			minLength: 1,
 		},
 	},
 	required: ['deviceCode'],
-	optionalProperties: ['resend'],
 	additionalProperties: false,
 };
 
@@ -91,7 +87,7 @@ export type CloudEndpoints = {
 	'/v1/cloud.syncWorkspace': {
 		POST: () => { success: boolean };
 	};
-	'/v1/cloud.announcements': {
-		GET: () => { announcements: Cloud.Announcement[] };
+	'/v1/cloud.removeLicense': {
+		POST: () => { success: boolean };
 	};
 };

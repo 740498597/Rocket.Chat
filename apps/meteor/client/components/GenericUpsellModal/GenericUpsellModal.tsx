@@ -1,8 +1,7 @@
 import { Box, Button, Modal } from '@rocket.chat/fuselage';
 import type { Keys as IconName } from '@rocket.chat/icons';
-import { useTranslation } from '@rocket.chat/ui-contexts';
 import type { ReactNode, ReactElement, ComponentProps } from 'react';
-import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type GenericUpsellModalProps = {
 	children?: ReactNode;
@@ -29,13 +28,13 @@ const GenericUpsellModal = ({
 	confirmText,
 	icon,
 	description,
-	onCancel,
 	onClose,
+	onCancel,
 	onConfirm,
 	annotation,
 	...props
 }: GenericUpsellModalProps) => {
-	const t = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<Modal {...props}>
@@ -66,12 +65,12 @@ const GenericUpsellModal = ({
 					<Modal.FooterControllers>
 						{onCancel && (
 							<Button secondary onClick={onCancel}>
-								{cancelText ?? t('Close')}
+								{cancelText ?? t('Cancel')}
 							</Button>
 						)}
 						{onConfirm && (
 							<Button primary onClick={onConfirm}>
-								{confirmText ?? t('Talk_to_sales')}
+								{confirmText ?? t('Upgrade')}
 							</Button>
 						)}
 					</Modal.FooterControllers>

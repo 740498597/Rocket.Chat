@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import type * as UiKit from '@rocket.chat/ui-kit';
+
 import type { IBanner } from '../IBanner';
 import type { Announcement } from './Announcement';
 import type { NpsSurveyAnnouncement } from './NpsSurveyAnnouncement';
@@ -46,6 +48,8 @@ export interface WorkspaceSyncResponse {
 	workspaceId: string;
 	publicKey: string;
 	license: unknown;
+	removeLicense?: boolean;
+	cloudSyncAnnouncement: unknown;
 }
 
 export interface WorkspaceCommsRequestPayload {
@@ -54,10 +58,16 @@ export interface WorkspaceCommsRequestPayload {
 	deploymentPlatform: string;
 	version: string;
 }
+
 export interface WorkspaceCommsResponsePayload {
 	nps?: NpsSurveyAnnouncement | null; // Potentially consolidate into announcements
 	announcements?: {
 		create: Announcement[];
 		delete: Announcement['_id'][];
 	};
+}
+
+export interface WorkspaceInteractionResponsePayload {
+	serverInteraction: UiKit.ServerInteraction;
+	serverAction?: 'syncWorkspace';
 }

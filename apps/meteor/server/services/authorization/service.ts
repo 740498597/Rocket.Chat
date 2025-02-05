@@ -4,8 +4,8 @@ import type { IUser, IRole, IRoom, ISubscription, IRocketChatRecord } from '@roc
 import { Subscriptions, Rooms, Users, Roles, Permissions } from '@rocket.chat/models';
 import mem from 'mem';
 
-import { AuthorizationUtils } from '../../../app/authorization/lib/AuthorizationUtils';
 import { canAccessRoom } from './canAccessRoom';
+import { AuthorizationUtils } from '../../../app/authorization/lib/AuthorizationUtils';
 
 import './canAccessRoomLivechat';
 
@@ -39,16 +39,20 @@ export class Authorization extends ServiceClass implements IAuthorization {
 	}
 
 	async started(): Promise<void> {
-		if (!(await License.hasValidLicense())) {
-			return;
-		}
+		try {
+			if (!(await License.hasValidLicense())) {
+				return;
+			}
 
-		const permissions = await License.getGuestPermissions();
-		if (!permissions) {
-			return;
-		}
+			const permissions = await License.getGuestPermissions();
+			if (!permissions) {
+				return;
+			}
 
-		AuthorizationUtils.addRolePermissionWhiteList('guest', permissions);
+			AuthorizationUtils.addRolePermissionWhiteList('guest', permissions);
+		} catch (error) {
+			console.error('Authorization Service did not start correctly', error);
+		}
 	}
 
 	async hasAllPermission(userId: string, permissions: string[], scope?: string): Promise<boolean> {

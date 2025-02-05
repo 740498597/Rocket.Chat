@@ -1,10 +1,10 @@
 import { Palette } from '@rocket.chat/fuselage';
 import type { ReactElement } from 'react';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { CardProps } from '../FeatureUsageCard';
 import FeatureUsageCard from '../FeatureUsageCard';
+import FeatureUsageCardBody from '../FeatureUsageCardBody';
 import UpgradeButton from '../UpgradeButton';
 import UsagePieGraph from '../UsagePieGraph';
 
@@ -27,7 +27,7 @@ const SeatsCard = ({ value, max, hideManageSubscription }: SeatsCardProps): Reac
 	const card: CardProps = {
 		title: t('Seats'),
 		infoText: t('Seats_InfoText'),
-		...(hideManageSubscription &&
+		...(!hideManageSubscription &&
 			nearLimit && {
 				upgradeButton: (
 					<UpgradeButton target='seats-card' action='buy_more' small>
@@ -43,7 +43,9 @@ const SeatsCard = ({ value, max, hideManageSubscription }: SeatsCardProps): Reac
 	const message = seatsLeft > 0 ? t('Seats_Available', { seatsLeft }) : undefined;
 	return (
 		<FeatureUsageCard card={card}>
-			<UsagePieGraph label={message} used={pieGraph.used} total={pieGraph.total} color={color} />
+			<FeatureUsageCardBody>
+				<UsagePieGraph label={message} used={pieGraph.used} total={pieGraph.total} color={color} />
+			</FeatureUsageCardBody>
 		</FeatureUsageCard>
 	);
 };

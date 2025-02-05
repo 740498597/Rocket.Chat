@@ -1,3 +1,5 @@
+import { defaultFeaturesPreview } from '@rocket.chat/ui-client';
+
 import { hasPermission, hasAtLeastOnePermission, hasAllPermission } from '../../../app/authorization/client';
 import { createSidebarItems } from '../../lib/createSidebarItems';
 
@@ -17,12 +19,6 @@ export const {
 		href: '/admin/subscription',
 		i18nLabel: 'Subscription',
 		icon: 'card',
-		permissionGranted: (): boolean => hasPermission('manage-cloud'),
-	},
-	{
-		href: '/admin/registration',
-		i18nLabel: 'Registration',
-		icon: 'cloud-plus',
 		permissionGranted: (): boolean => hasPermission('manage-cloud'),
 	},
 	{
@@ -134,6 +130,12 @@ export const {
 		i18nLabel: 'Emoji',
 		icon: 'emoji',
 		permissionGranted: (): boolean => hasPermission('manage-emoji'),
+	},
+	{
+		href: '/admin/feature-preview',
+		i18nLabel: 'Feature_preview',
+		icon: 'flask',
+		permissionGranted: () => defaultFeaturesPreview?.length > 0,
 	},
 	{
 		href: '/admin/settings',
